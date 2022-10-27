@@ -17,14 +17,16 @@ import static it.unibo.exceptions.arithmetic.ArithmeticService.TIMES;
 public final class UseArithmeticService {
 
     private static final PrintStream LOG = System.out;
+    private static final boolean TRYING = true;
 
     private UseArithmeticService() { }
 
     /**
      *
      * @param args unused
+     * @throws Exception
      */
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws Exception {
         try {
             new ServiceBehindUnstableNetwork(1);
             throw new AssertionError("Expected an IllegalArgumentException, but no Exception was thrown");
@@ -47,6 +49,13 @@ public final class UseArithmeticService {
          * This method should re-try to send message to the provided server, catching all IOExceptions,
          * until it succeeds.
          */
+        while (TRYING) {
+            try {
+            server.sendData(message);
+            } catch (final IOException e) {
+                    LOG.println("I/O error: " + e);
+            }
+        }
     }
 
     private static String retryReceiveOnNetworkError(final NetworkComponent server) {
@@ -54,7 +63,13 @@ public final class UseArithmeticService {
          * This method should re-try to retrieve information from the provided server, catching all IOExceptions,
          * until it succeeds.
          */
-        return null;
+        while (TRYING) {
+            try {
+            return server.receiveResponse();
+            } catch (final IOException e) {
+                LOG.println("I/O error: " + e);
+            }
+        }
     }
 
     private static void assertEqualsAsDouble(final String expected, final String actual) {
